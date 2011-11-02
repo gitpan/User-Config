@@ -1,0 +1,6 @@
+Revision history for Perl extension User::Config.
+
+0.00_01  Mon Aug 29 18:07:29 2011
+	- original version; created by h2xs 1.23 with options
+		-Xn User::Config -v 0.00_01
+

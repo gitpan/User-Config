@@ -1,0 +1,162 @@
+=head1 NAME
+
+User::Config::Manual - What is User::Config exactly and how can it be used
+
+=head1 VERSION
+
+version 0.00_01
+
+=head1 What is User::Config?
+
+As applications become bigger and bigger, often the user should be able to
+tune certain things to fit their needs. These settings are wide spread through
+the application and its management might become very difficult. In multiuser
+applications this becomes even more true. Additionally these setting should be
+saved to be provided even after a restart of this application.
+
+L<User::Config> aims to make this task as easy as possible. While each module
+can define it's own parameters and options, all of them can be configured
+via a single Interface. Additionaly modified values will transparently loaded
+and stored within an database.
+
+While the application starts and the modules are loaded, each option gets
+registered. Thus an userinterface can show all options of all modules
+loaded at a given time.
+
+=head1 EXAMPLES
+
+In the following text the different tasks in using L<User::Config> will be
+highlighted.
+
+=head2 How to define a parameter?
+
+Defining a new parameter is as easy as declaring using C<has_option> it
+
+  use User::Config
+  
+  has_option my_setting;
+
+Now, the current value of this parameter for the user called 'foo' can be
+retrieved eg using the following command:
+
+  my $setting = $self->my_setting({ user => 'foo' });
+
+Changing this configuration is possible as well:
+
+  $self->my_setting({ user => 'foo'}, "new value");
+
+=head2 Do I always have to supply a username? - Or - How can I set a context?
+
+A context can be a hash-ref or an object. In both cases it must either have
+an key called C<User> or a method C<user> which can be called to get the
+name of the currently active user.
+
+L<User::Config> supports multiple contexts at the same time. If more then one
+is set, the most specific will be choosen. Currently there are the following
+contexts (the most specific first):
+
+=over 4
+
+=item command-supplied context
+
+This context is set at the time, the setting is read or written. The context is
+passed while calling the corresponding configuration-item. To not set the
+context, simply do not pass it. This kind of context was used in the previous
+example.
+
+=item module context
+
+Each (perl-)modul can set its own persistant context. To set this context, call
+
+  $self->context($context);
+
+To unset it, supply C<undef> as context:
+
+  $self->context(undef);
+
+=item global context
+
+There is also a possability to supply a global or default context, used by all
+modules
+
+  User::Config->instance->context($context);
+
+=back
+
+=head2 What are the default values for my settings?
+
+For each setting, a default value can be supplied either using a fixed value,
+or using a sub-ref for computing a new value on demand. This function will get
+the current context supplied.
+
+  has_option my_setting => (
+	default => sub {
+		my ($context, $name) = @_; # $name will be "my_setting"
+		...
+	}
+  )
+
+=head2 How to use a setting in a different module?
+
+While defining a setting, provide a cross-reference and the settings in
+both modules will always have the same value
+
+  has_option other_setting => (
+	references => 'other::modules::name::setting_name'
+  )
+
+=head2 How to make changes to the settings persistent?
+
+When provided, the settings will automaticly saved within a persistant database.
+While starting, a simple memory-based backend is used, but there are others
+supplied. One of them can be loaded using for example the following code:
+
+  Config::User->instance->db('Keyed', {
+	connector => 'dbi:SQLite:mydatabase',
+	table => 'usersettings'
+  })
+
+All database backends live within the namespace User::Config::DB. See eg
+L<User::Config::DB::LDAP>, L<User::Config::DB::DBIC> or
+L<User::Config::DB::Keyed> for more details.
+
+=head2 How to provide an interface to the user?
+
+The modules within L<User::Config::UI> provide a interface which can be used to
+present to the user.
+
+To generate a HTML-Form using L<HTML::Formhandler>, the following code would be
+sufficient
+
+  use User::Config
+  use CGI;
+  
+  my $form = User::Config->ui('HTMLFormHandler', CGI->new->Vars);
+
+For more information see L<User::Config::UI::HTMLFormHandler>
+
+=head2 Can I integrate User::Config in my Catalyst-Application?
+
+The distribution of L<User::Config> includes a helper-modul for L<Catalyst>.
+To generate a model with the functional range of L<User::Config> the command
+
+  script/myapp_create.pl model UserConfig UserConfig
+
+will generate the needed code. Additionaly this model will incorperate the
+form-method of L<User::Config::UI::HTMLFormHandler/form>
+
+=head1 SEE ALSO
+
+L<User::Config>
+L<User::Config::DB>
+L<User::Config::UI>
+
+=head1 AUTHOR
+
+Benjamin Tietz E<lt>benjamin@micronet24.deE<gt>
+
+=head1 COPYRIGHT
+
+This was licensed under the same terms as Perl itself.
+
+
