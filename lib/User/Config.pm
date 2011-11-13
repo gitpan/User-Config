@@ -9,7 +9,7 @@ use Moose::Exporter;
 use Carp;
 use User::Config::DB::Mem;
 
-our $VERSION = '0.01_00';
+our $VERSION = '0.02_01';
 $VERSION = eval $VERSION;  # see L<perlmodstyle>
 
 #Moose::Exporter->setup_import_methods is called at the end of this document,
@@ -73,16 +73,20 @@ The following parameters are currently supported:
 
 =over 4
 
-=item C<coerce =E<gt> (1|0)>
+=item C<<anon_default => ($default|sub { ... })>>
+
+Will be used as C<default>, but only if no user logged in. If this isn't given, C<default> is used.
+
+=item C<<coerce => (1|0)>>
 
 Use coercion. See L<Moose/has>
 
-=item C<dataclass =E<gt> $db_class>
+=item C<<dataclass => $db_class>>
 
 this entry might be used by the database-backend to decide how or where
 to save the entry
 
-=item C<default =E<gt> ($default|sub { ... })>
+=item C<<default => ($default|sub { ... })>>
 
 defines the default value for a given entry. If defined this either might be
 a scalar, which will be used as value for this option, as long as the user
@@ -90,50 +94,57 @@ didn't set it to something else. Or it might be a CODE-ref. In this case
 the code will be executed the first time this option is read for a certain
 user. On this first time it automaticly will be set in the backend.
 
-=item C<documentation =E<gt> "Documentative string">
+=item C<<documentation => "Documentative string">>
 
 Document the option. This will be accessable as $self->item->documentation and
 may be used by UI-Generators.
 
-=item C<hidden =E<gt> (1|0)>
+=item C<<hidden => (1|0)>>
 
 If this set to a true value, the corresponding item will be ignored by the
 UI-Generator.
 
-=item C<isa =E<gt> $type_name>
+=item C<<isa => $type_name>>
 
 set up runtime constrain checking for this option using L<Moose/has>.
 
-=item C<lazy =E<gt> (1|0)>
+=item C<<lazy => (1|0)>>
 
 See L<Moose/has>
 
-=item C<range =E<gt> [ $min, $max ]>
+=item C<<noset => (1|0)>>
+
+If set to something true, a value set to this value will silently be
+ignored. This implies C<hidden>.
+This might be useful in conjunction with C<default>/C<anon_default>, if
+a database-connection night not be available.
+
+=item C<<range => [ $min, $max ]>>
 
 if this is set, the UI-Generator will assure, that the user didn't set
 a value outside.
 
-=item C<references =E<gt> 'Path::To::Modul::option_name'>
+=item C<<references => 'Path::To::Modul::option_name'>>
 
 this tells User::Config to access the C<option_name> of the Modul
 C<Path::To::Modul>, when this option is accessed. Thus both options always
 will have the same value. The UI-Generator will silently ignore this option
 and do not a display a corresponding entry to the user.
 
-=item C<trigger =E<gt> sub { ... }>
+=item C<<trigger => sub { ... }>>
 
 triggers the following code every time the option is set. See L<Moose/has> for
 details.
 
-=item C<ui_type =E<gt> 'String'>
+=item C<<ui_type => 'String'>>
 
 this will be used by the UI-Generator to provide a suitable element.
 
-=item C<validate =E<gt> CODEREF>
+=item C<<validate => CODEREF>>
 
 a code that will be executed, if the user set's a new value.
 
-=item C<weak_ref =E<gt> (1|0)>
+=item C<<weak_ref => (1|0)>>
 
 See L<Moose/has>
 
@@ -181,13 +192,14 @@ sub has_option {
 						_context_test($_[0]));
 			       	$context = $self->context unless $context;
 				$context = $option->context unless $context;
-				croak "Can't access $name without a context\n" unless $context;
-				$user = $context->{user}
-					if exists $context->{user};
-				$user = $context->user
-					if not defined $user and 
+				if($context) {
+					$user = $context->{user}
+						if exists $context->{user};
+					$user = $context->user
+						if not defined $user and 
 						ref $context ne "HASH" and 
 						$context->can("user");
+				}
 				my $ns = blessed($self);
 				$ns = $self unless $ns;
 				if($getter) {

@@ -2,29 +2,15 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/001-User-Config.t
 t/002-API.t
 t/003-Pod.t
-t/100-UI-HTMLFormHandler.t
 t/200-DB-Mem.t
-t/210-DB-Ldap.t
-t/211-DB-Ldap-prebound.t
-t/220-DB-DBIC.t
-t/230-DB-Keyed.t
-t/500-Catalyst-Helper-Model.t
-t/User/Config/Test/Schema/Result/Test.pm
 t/User/Config/Test/rem.pm
-t/User/Config/Test/Schema.pm
 t/User/Config/Test.pm
-lib/Catalyst/Helper/Model/UserConfig.pm
 lib/User/Config.pm
 lib/User/Config/Manual.pod
 lib/User/Config/DB.pm
 lib/User/Config/DB/Mem.pm
-lib/User/Config/DB/Ldap.pm
-lib/User/Config/DB/DBIC.pm
-lib/User/Config/DB/Keyed.pm
 lib/User/Config/UI.pm
-lib/User/Config/UI/HTMLFormHandler.pm
-lib/User/Config/UI/HTMLFormHandler/Model.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

@@ -7,12 +7,6 @@ WriteMakefile(
     VERSION_FROM      => 'lib/User/Config.pm', # finds $VERSION
     PREREQ_PM         => {
 	    Moose => 2.02,
-	    'HTML::FormHandler' => undef,
-	    'Net::LDAP' => undef,
-	    'DBIx::Class' => undef,
-    },
-    BUILD_REQUIRES    => {
-	    'Test::Deep' => undef
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (

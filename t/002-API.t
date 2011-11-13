@@ -1,4 +1,4 @@
-use Test::More tests => 9;
+use Test::More tests => 12;
 eval { require Test::Pod::Coverage; };
 my $podcoverage = $@;
 
@@ -13,9 +13,14 @@ use User::Config::Test::rem;
 
 my $mod = User::Config::Test->new;
 
+is($mod->setting, "anonymous", "default value without login");
 $mod->context({user => "foo"});
 $mod->setting("bar");
 $mod->setting({user => "foobar"}, "hoho");
+
+is($mod->getting, "noset", "Default for setonly");
+$mod->getting("foobar");
+is($mod->getting, "noset", "Default for setonly is unset");
 
 is($mod->setting, "bar", "Setting in modul context");
 is($mod->setting({user => "foobar"}), "hoho", "Setting in specific context");

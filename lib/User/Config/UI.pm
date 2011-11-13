@@ -97,6 +97,7 @@ sub get_options {
 		} grep {
 			$nso->{$_} and not 
 			($nso->{$_}->{hidden} or
+			 $nso->{$_}->{noset} or
 			 $nso->{$_}->{references})
 		} keys %{$nso};
 	}

@@ -2,7 +2,9 @@ package User::Config::Test;
 
 use User::Config;
 
-has_option "setting" => ( default => "defstr", dataclass => "foocl" );
+has_option "setting" => ( default => "defstr", dataclass => "foocl", anon_default => "anonymous" );
+
+has_option "getting" => ( default => "noset", noset => 1 );
 
 my $foo = 0;
 

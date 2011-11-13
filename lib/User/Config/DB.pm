@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Moose::Role;
 
-our $VERSION = '0.01_00';
+our $VERSION = '0.01_01';
 $VERSION = eval $VERSION;  # see L<perlmodstyle>
 
 requires 'get';
@@ -27,7 +27,7 @@ User::Config::DB:: and consume this role.
 The interface was held as simple as possible. To consume this role, the
 following methods have to be implemented.
 
-=head3 C<$db->set($package, $user, $option_name, $context, $value)>
+=head3 C<<$db->set($package, $user, $option_name, $context, $value)>>
 
 The C<set> method has to be implemented. Whenever a user sets a speicific
 option to a new value, this method is called and has to take care of storing
@@ -60,14 +60,14 @@ The new value to set.
 
 =back
 
-=head3 C<$db->get($package, $user, $option_name, $context)>
+=head3 C<<$db->get($package, $user, $option_name, $context)>>
 
 The C<get> method has to be implemented by the corresponding backend. It
 returns the previous set value or undef, if no value was set.
 
 The parameters work are the same as for C<set>.
 
-=head3 C<$db->isset($package, $user, $option_name, $context)>
+=head3 C<<$db->isset($package, $user, $option_name, $context)>>
 
 Optionally, the backend can implement the C<isset>-method. This will be called
 before C<get> is called. If the user has set this option in advance, the method
@@ -81,26 +81,38 @@ be returned, if C<get> returns undef.
 
 =head2 INTERNALS
 
-The followin information aren't needed to write new code. There here for
+The following information aren't needed to write new code. There here for
 completness only.
 
-While C<set> is passed directly from the caller, C<get> is wrapped in this role.
-The wrapper checks wether the backend implements C<isset> and returns the
-user-set value or the default, if the setting isn't stored.
+While C<set> is just checking, wether the user is valid, C<get> is completly
+wrapped in this role. The wrapper checks wether the backend implements C<isset>
+and returns the user-set value or the default, if the setting isn't stored.
 
 =cut
 
-around get => sub {
-	my ($code, $self, $namespace, $user, $name, $ctx) = @_;
+around set => sub {
+	my $code = shift;
+	my ($self, $namespace, $user, $name, $ctx, $value) = @_;
+	my $opts = User::Config::instance()->options()->{$namespace}->{$name};
+	return if $opts->{noset};
+	return unless $user;
+	return &$code(@_);
+};
 
+around get => sub {
+	my $code = shift;
+	my $self = shift;
+	my ($namespace, $user, $name, $ctx) = @_;
+
+	return $self->default(@_) unless $user;
 	if($self->can("isset")) {
-		return &$code($self, $namespace, $user, $name, $ctx)
-			if $self->isset($namespace, $user, $name, $ctx);
-		return $self->default($namespace, $user, $name, $ctx);
+		return &$code($self, @_)
+			if $self->isset(@_);
+		return $self->default(@_);
 	}
-	my $ret = &$code( $self, $namespace, $user, $name, $ctx);
+	my $ret = &$code( $self, @_);
 	return $ret if defined $ret;
-	return $self->default($namespace, $user, $name, $ctx);
+	return $self->default(@_);
 };
 
 =pod
@@ -114,7 +126,10 @@ retrieved.
 
 sub default {
 	my ($self, $namespace, $user, $name, $ctx) = @_;
-	my $def = User::Config::instance()->options()->{$namespace}->{$name}->{default};
+	my $def;
+	my $opts = User::Config::instance()->options()->{$namespace}->{$name};
+	$def = $opts->{anon_default} unless $user;
+	$def = $opts->{default} unless $def;
 	return unless $def;
 	return $def unless ref $def;
 	if(ref $def eq "CODE") {

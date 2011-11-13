@@ -1,4 +1,4 @@
-User-Config version 0.00_01
+User-Config version 0.02_01
 ===========================
 
 Within larger (multiuser-)applications certain configuration-items should be
@@ -31,9 +31,12 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
 * Moose
-* HTML::FormHandler
-* DBIx::Class
-* Net::Ldap
+
+You should also choose a suitable database backend and user interface.
+eg. take a look at
+
+User::Config::DB::DBIC, User::Config::DB::Ldap, User::Config::DB::Keyed,
+User::Config::UI::HTMLFormHandler
 
 COPYRIGHT AND LICENCE
 

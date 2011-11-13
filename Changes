@@ -1,5 +1,11 @@
 Revision history for Perl extension User::Config.
 
+0.02_01  Sun Nov 13 18:19:45 2011
+	- split out most of User::Config::DB::* and User::Config::UI::*
+
+0.01_01  Mon Nov 07 19:52:37 2011
+	- added noset and anon_default options
+
 0.00_01  Mon Aug 29 18:07:29 2011
 	- original version; created by h2xs 1.23 with options
 		-Xn User::Config -v 0.00_01
